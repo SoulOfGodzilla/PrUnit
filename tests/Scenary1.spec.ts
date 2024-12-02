@@ -24,7 +24,6 @@ test('Buscar un producto válido en Liverpool', async ({ page }) => {
   await page.pause();
 });
 
-
 test('Verificar mensaje de no hay resultados', async ({ page }) => {
   await page.goto('https://www.liverpool.com.mx');
 
@@ -63,42 +62,6 @@ test('Verificar sugerencias automáticas', async ({ page }) => {
 
   await page.pause();
 });
-/*
-test('Buscar un producto con filtro de precio', async ({ page }) => {
-  // Ir a la página de inicio de Liverpool
-  await page.goto('https://www.liverpool.com.mx');
-
-  // Esperar a que el campo de búsqueda esté visible y realizar la búsqueda de un producto
-  await page.waitForSelector('input[placeholder*="Buscar por producto"]', { state: 'visible', timeout: 5000 });
-  await page.fill('input[placeholder*="Buscar por producto"]', 'celular');
-  await page.press('input[placeholder*="Buscar por producto"]', 'Enter');
-
-  // Esperar a que los resultados de búsqueda estén visibles
-  await page.waitForSelector('.o-card__image__container', { state: 'visible', timeout: 10000 });
-
-  // Aplicar un filtro de precio - Esperar a que el filtro de rango de precios esté visible
-  await page.waitForSelector('button.a-title__filter]', { state: 'visible', timeout: 5000 });
-  await page.click('button.a-title__filter');
-
-  // Esperar a que los radio-buttons con los rangos de precios estén visibles
-  await page.waitForSelector('#variants.prices.sortPrice-5000-10000', { state: 'visible', timeout: 5000 }); // Cambiar el ID aquí
-
-  // Seleccionar el radio-button correspondiente al rango de precios "$5000.0 - $10000.0"
-  await page.click('#variants.prices.sortPrice-5000-10000');  // Cambiar el ID aquí
-
-  // Esperar a que los productos se filtren según el rango de precio seleccionado
-  await page.waitForSelector('.o-card__image__container', { state: 'visible', timeout: 10000 });
-
-  // Verificar que los productos estén dentro del rango de precios seleccionado
-  const precios = await page.locator('.mdc-chip__text');  // Ajusta el selector según sea necesario
-  const primerPrecio = await precios.nth(0).innerText();
-  const primerPrecioNumerico = parseFloat(primerPrecio.replace('$', '').replace(',', '').trim());
-
-  // Verificar que el primer precio esté dentro del rango seleccionado (5000 - 10000)
-  expect(primerPrecioNumerico).toBeGreaterThanOrEqual(5000);
-  expect(primerPrecioNumerico).toBeLessThanOrEqual(10000);
-});*/
-
 
 test('Buscar un producto con filtro', async ({ page }) => {
   // Ir a la página de inicio de Liverpool
@@ -115,14 +78,35 @@ test('Buscar un producto con filtro', async ({ page }) => {
   // Buscar y hacer clic en el botón por su texto visible
   await page.click('button:has-text("Color")'); 
 
-    // Esperar a que el enlace con el atributo data-color esté visible
+  // Esperar a que el enlace con el atributo data-color esté visible
   await page.waitForSelector('a[data-color="#ffffff"]', { state: 'visible', timeout: 10000 });
 
   // Hacer clic en el enlace
   await page.click('a[data-color="#ffffff"]');
 
-
   // Esperar a que los productos se filtren según el color seleccionado
   await page.waitForSelector('.o-card__image__container', { state: 'visible', timeout: 10000 });
+  await page.pause();
+});
+
+test('Buscar con caracteres especiales', async ({ page }) => {
+  // Navegar al sitio web
+  await page.goto('https://www.liverpool.com.mx');
+
+  // Ingresar caracteres especiales en el campo de búsqueda
+  await page.fill('input[placeholder*="Buscar por producto"]', '@#$%^&*');
+  await page.press('input[placeholder*="Buscar por producto"]', 'Enter');
+
+  // Verificar el mensaje de resultados no encontrados
+  const mensaje = await page.locator('.o-content__noResultsNullSearch');
+  await page.waitForSelector('.o-content__noResultsNullSearch', { state: 'visible', timeout: 60000 });
+
+  // Comprobar que el mensaje sea visible
+  await expect(mensaje).toBeVisible();
+
+  // Comprobar que el mensaje contiene texto relacionado con "Sin resultados"
+  const textoMensaje = await mensaje.textContent();
+  expect(textoMensaje).toMatch(/no encontramos|sin resultados/i);
+
   await page.pause();
 });
